@@ -18,6 +18,4 @@ int build_huffman_table(hft_t *hft) {
         }
         curr_pos++;
 
-
-
    hft->code_size_arr; 
