@@ -3,6 +3,8 @@
 
 int taskid;
 int numtasks;
+int *disp_arr;
+int *sendcounts;
 
 int main(int argc, char *argv[]) {
 
@@ -17,31 +19,65 @@ int main(int argc, char *argv[]) {
 
 void send_recv() {
     
-    int *imm_buf;
+    int *inp_mat;
     if (taskid != 0) {
-        imm_buf = malloc(send_per_worker * send_per_worker * sizeof(int));
+        inp_mat = malloc(sendcounts[taskid] * sendcounts[taskid] * sizeof(int));
     }
 
-    MPI_Scatterv(inp_matrix, sendcounts, disp_arr, MPI_INT, imm_buf, send_per_worker,,MPI_INT, 0, MPI_COMM_WORLD);    
+    MPI_Scatterv(matrix, sendcounts, disp_arr, MPI_INT, inp_mat, sendcounts[taskid], MPI_INT, 0, MPI_COMM_WORLD);
 
-    for (int i = 0; i < sendcounts[taskid]; i++) {
+    int curr_num_rows = sendcounts[taskid] / 5000;
+    int **res = malloc(curr_num_rows * sizeof(int*));
 
+    for (int i  = 0; i < curr_num_rows - 2; i++) {
 
-   MPI_Gatherv(calc_reorder_buf, send_per_worker, MPI_INT, matrix, recvcount_arr, disp_arr, 0, MPI_COMM_WORLD);
+        res[i] = malloc(4998 * sizeof(int));
+
+    }
+
+    for (int i = 1; i < curr_num_rows - 1; i++) {
+
+        for (int j = 0; j < 5000; j++) {
+
+            if (j == 0 || j == 4999) {
+
+                res[i][j] = inp_mat[i][j];
+                continue;
+
+            }
+
+            int diag = inp_mat[i - 1][j - 1] * -1 + inp_mat[i + 1][j + 1] * 1;
+            int Gx =  diag + inp_mat[i - 1][j + 1] + inp_mat[i][j - 1] * -2 + inp_mat[i][j + 1] * 2 + inp_mat[i + 1][j - 1] * -1; 
+            int Gy =  diag + inp_mat[i - 1][j] * -2 + inp_mat[i - 1][j + 1] * -1  + inp_mat[i + 1][j - 1] * 1 + inp_mat[i + 1][j] * 2; 
+
+            Gx = (Gx >= 0) ? Gx : -Gx;
+            Gy = (Gy >= 0) ? Gy : -Gy;
+
+            res[i][j] = Gx + Gy;
+        }
+
+    }
+
+    MPI_Gatherv(res, recvcounts[taskid], MPI_INT, matrix, recvcounts, recv_disp_arr, MPI_INT, 0, MPI_COMM_WORLD);
 
 void init_marices() {
-    send_per_worker = 5000/numtasks;
-    extra_send = 5000 % numtasks;
+    int disp_jmp = (5000 * 5000) / numtasks;
+    int send_per_worker = disp_jmp + 10000;
+    tnt extra_send = (5000 * 5000) % numtasks;
     
     for (int i = 0; i < numtasks - 1; i++) {
 
-        displ[i] = i * send_per_worker;
+        disp_arr[i] = i * disp_jmp; 
+        recv_disp_arr[i] = i * disp_jmp + 5000;
         sendcounts[i] = send_per_worker; 
+        recvcounts[i] = disp_jmp; 
 
     }
 
-    displ[numtasks - 1] = (numtasks - 1) * send_per_worker;
-    sendcounts[numtasks - 1] = (numtasks - 1) * send_per_worker + extra_send;
+    disp_arr[numtasks - 1] = (numtasks - 1) * rows_per_worker;
+    recv_disp_arr[numtasks - 1] = (numtasks - 1) * disp_jmp + 5000;
+    sendcounts[numtasks - 1] = send_per_worker + extra_send;
+    recvcounts[numtasks - 1] = disp_jmp + extra_send; 
 
 }
 

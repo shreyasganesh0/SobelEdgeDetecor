@@ -2,9 +2,9 @@
 
 int main(int argc, char *argv[]) {
 
-    u8 A = malloc(5000 * sizeof(u8*));
+    int A = malloc(5000 * sizeof(u8*));
     for (int i = 0; i < 5000; i++) {
-        A[i] = malloc(5000 * sizeof(u8));
+        A[i] = malloc(5000 * sizeof(int));
     }
     sobel_filter();
     display();
@@ -16,9 +16,9 @@ void sobel_filter() {
 
         for (int j = 1; j < 4999; j++) {
 
-            u8 diag =inp_mat[i - 1][j - 1] * -1 + inp_mat[i + 1][j + 1] * 1;
-            u8 Gx =  diag + inp_mat[i - 1][j + 1] + inp_mat[i][j - 1] * -2 + inp_mat[i][j + 1] * 2 + inp_mat[i + 1][j - 1] * -1; 
-            u8 Gy =  diag + inp_mat[i - 1][j] * -2 + inp_mat[i - 1][j + 1] * -1  + inp_mat[i + 1][j - 1] * 1 + inp_mat[i + 1][j] * 2; 
+            int diag =inp_mat[i - 1][j - 1] * -1 + inp_mat[i + 1][j + 1] * 1;
+            int Gx =  diag + inp_mat[i - 1][j + 1] + inp_mat[i][j - 1] * -2 + inp_mat[i][j + 1] * 2 + inp_mat[i + 1][j - 1] * -1; 
+            int Gy =  diag + inp_mat[i - 1][j] * -2 + inp_mat[i - 1][j + 1] * -1  + inp_mat[i + 1][j - 1] * 1 + inp_mat[i + 1][j] * 2; 
 
             Gx = (Gx >= 0) ? Gx : -Gx;
             Gy = (Gy >= 0) ? Gy : -Gy;
