@@ -22,7 +22,13 @@ void sobel_filter() {
 
     for (int i = 1; i < 4999; i++) {
 
-        for (int j = 1; j < 4999; j++) {
+        for (int j = 0; j < 5000; j++) {
+            
+            if (j == 0 || j == 4999) {
+
+                A[i - 1][j] = matrix[i][j];
+                continue;
+            }
 
             int diag = matrix[i - 1][j - 1] * -1 + matrix[i + 1][j + 1] * 1;
             int Gx =  diag + matrix[i - 1][j + 1] + matrix[i][j - 1] * -2 + matrix[i][j + 1] * 2 + matrix[i + 1][j - 1] * -1; 
@@ -31,7 +37,7 @@ void sobel_filter() {
             Gx = (Gx >= 0) ? Gx : -Gx;
             Gy = (Gy >= 0) ? Gy : -Gy;
 
-            A[i][j] = Gx + Gy;
+            A[i - 1][j] = Gx + Gy;
         }
     }
 }
@@ -40,24 +46,17 @@ void display() {
 
     for (int i = 0; i < 5000; i++) {
 
-        printf("%d, ", matrix[0][i]);
+        printf("%d ", matrix[0][i]);
 
     }
     printf("\n");
 
-    for (int i = 1; i < 4999; i++) {
+    for (int i = 0; i < 4999; i++) {
 
         for (int j = 0; j < 5000; j++) {
 
-            if (j == 0 || j == 4999) {
-            
-                printf("%d ", matrix[i][j]);
+            printf("%d ", A[i][j]);
 
-            } else {
-
-                printf("%d ", A[i][j]);
-
-            }
         }
 
         printf("\n");
@@ -76,7 +75,7 @@ void read_img() {
     FILE *file = fopen("input.txt", "r");
     if (file == NULL) {
 	
-	printf("Failed open\n");
+        printf("Failed open\n");
     }
     matrix = malloc(5000 * sizeof(uint8_t*));
     matrix[0] = malloc(25000000); 
@@ -88,14 +87,13 @@ void read_img() {
         matrix[i] = ptr;
     }
 
-    uint8_t val;
+    int val = 0;
     for (int i = 0; i < 5000; i++) {
 
         for (int j = 0; j < 5000; j++) {
             
             if (fscanf(file, "%d", &val) == 1) {        
 
-                printf("%d", val);
                 matrix[i][j] = val;
             }
         }
