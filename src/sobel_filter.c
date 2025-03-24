@@ -13,16 +13,12 @@ void display();
 
 int main(int argc, char *argv[]) {
 
-    printf("Starting prog\n");
     read_img();
-    printf("Starting filter\n");
     sobel_filter();
-    printf("Starting disp\n");
     display();
 }
 
 void sobel_filter() {
-    printf("Starting calc\n");
 
     for (int i = 1; i < 4999; i++) {
 
@@ -38,7 +34,6 @@ void sobel_filter() {
             A[i][j] = Gx + Gy;
         }
     }
-    printf("Ending calc\n");
 }
 
 void display() {
@@ -70,7 +65,7 @@ void display() {
 
     for (int i = 0; i < 5000; i++) {
 
-        printf("%d, ", matrix[4999][i]);
+        printf("%d ", matrix[4999][i]);
 
     }
     printf("\n");
@@ -78,44 +73,42 @@ void display() {
                 
 void read_img() {
     
-    int fd = open("input.txt", O_RDWR);
-    if (fd == -1) {
+    FILE *file = fopen("input.txt", "r");
+    if (file == NULL) {
 	
 	printf("Failed open\n");
     }
-
-    printf("Mallocs start\n");
     matrix = malloc(5000 * sizeof(uint8_t*));
     matrix[0] = malloc(25000000); 
-    if (matrix == NULL  ||  matrix[0] == NULL) {
-	printf("Failed malloc\n");
-    }
     uint8_t *ptr = matrix[0];
 
-    for (int i = 1; i = 5000; i++) {
+    for (int i = 1; i < 5000; i++) {
 	
-	ptr += 5000;
-	matrix[i] = ptr;
+        ptr += 5000;
+        matrix[i] = ptr;
+    }
+
+    uint8_t val;
+    for (int i = 0; i < 5000; i++) {
+
+        for (int j = 0; j < 5000; j++) {
+            
+            if (fscanf(file, "%d", &val) == 1) {        
+
+                printf("%d", val);
+                matrix[i][j] = val;
+            }
+        }
     }
 
     A = malloc(5000 * sizeof(uint8_t*));
     A[0] = malloc(25000000); 
     ptr = A[0];
 
-    for (int i = 1; i = 5000; i++) {
+    for (int i = 1; i < 5000; i++) {
 	
-	ptr += 5000;
-	A[i] = ptr;
+        ptr += 5000;
+        A[i] = ptr;
     }
-    printf("Mallocs done\n");
 
-    int pos = 0;
-    char *tmpptr = matrix[0];
-    ssize_t num_read;
-    printf("Starting read\n");
-    while ((num_read = read(fd, matrix[pos], 5000)) > 0) {
-	
-	pos++;
-    }
-    printf("Ending read\n");
 }
